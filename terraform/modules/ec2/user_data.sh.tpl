@@ -4,6 +4,10 @@
 dnf update -y
 dnf install -y nginx golang git
 
+# Install PostgreSQL client
+dnf update -y
+sudo dnf install postgresql15.x86_64 postgresql15-server -y
+
 # Start and enable Nginx
 systemctl start nginx
 systemctl enable nginx
@@ -16,6 +20,21 @@ chown -R ec2-user:ec2-user /home/ec2-user/golang-demo
 echo 'export PATH=$PATH:/usr/local/go/bin' >> /home/ec2-user/.bash_profile
 echo 'export GOPATH=/home/ec2-user/go' >> /home/ec2-user/.bash_profile
 echo 'export PATH=$PATH:$GOPATH/bin' >> /home/ec2-user/.bash_profile
+
+
+# Create .pgpass file with correct permissions
+sudo -u ec2-user bash -c "echo '${db_endpoint}:${db_port}:${db_name}:${db_username}:${db_password}' > /home/ec2-user/.pgpass"
+sudo -u ec2-user chmod 600 /home/ec2-user/.pgpass
+
+# Create the videos table in the database
+sudo -u ec2-user psql -h ${db_endpoint} -U ${db_username} -d ${db_name} << EOF
+CREATE TABLE IF NOT EXISTS videos (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+EOF
 
 # Build and run the Go application as ec2-user
 sudo -u ec2-user bash << EOF
