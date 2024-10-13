@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-go
+    environment:
+      - DB_ENDPOINT=postgresdatabase
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=gopass
+      - DB_NAME=goapp
+    depends_on:
+      - postgresdatabase
+    ports:
+      - "8080:8080" 
+
+  postgresdatabase:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=gopass
+      - POSTGRES_DB=goapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
