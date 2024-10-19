@@ -12,8 +12,10 @@ services:
     depends_on:
       - postgresdatabase
     ports:
-      - "8080:8080" 
-
+      - "8080:8080"
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+    command: air  # Use Air for hot-reloading
   postgresdatabase:
     build:
       context: .
@@ -24,6 +26,5 @@ services:
       - POSTGRES_DB=goapp
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
 volumes:
   postgres_data:

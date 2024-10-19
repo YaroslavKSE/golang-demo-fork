@@ -4,6 +4,10 @@ FROM golang:1.23.1
 # Set the working directory
 WORKDIR /app
 
+# Install Air for hot-reloading and Git for VCS
+RUN go install github.com/air-verse/air@latest && \
+    apt-get update && apt-get install -y git
+
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
@@ -13,8 +17,11 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
-# Build the application
-RUN GOOS=linux GOARCH=amd64 go build -o golang-demo
+# Initialize Git repository (this is a workaround for the VCS error)
+RUN git init
 
-# Command to run the executable
-CMD ["./golang-demo"]
+# Build the application with verbose output and without VCS stamping
+RUN go build -v -buildvcs=false -o /app/golang-demo
+
+# Command to run Air for hot-reloading
+CMD ["air", "-c", ".air.toml"]
