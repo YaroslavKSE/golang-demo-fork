@@ -1,11 +1,14 @@
-output "instance_id" {
-  value = aws_instance.main.id
+output "asg_name" {
+  description = "Name of the Auto Scaling Group"
+  value       = aws_autoscaling_group.main.name
 }
 
-output "public_ip" {
-  value = aws_instance.main.public_ip
+output "launch_template_id" {
+  description = "ID of the Launch Template"
+  value       = aws_launch_template.main.id
 }
 
 output "security_group_id" {
-  value = aws_security_group.ec2.id
+  description = "ID of the EC2 security group"
+  value       = aws_security_group.ec2.id
 }

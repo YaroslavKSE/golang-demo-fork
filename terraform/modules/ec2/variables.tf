@@ -32,3 +32,19 @@ variable "user_data_vars" {
   description = "Variables to pass to the user data script"
   type        = map(string)
 }
+
+variable "instance_count" {
+  description = "Number of EC2 instances to create"
+  type        = number
+  default     = 2
+}
+
+variable "alb_security_group_id" {
+  description = "Security group ID of the ALB"
+  type        = string
+}
+
+variable "target_group_arn" {
+  description = "ARN of the target group"
+  type        = string
+}

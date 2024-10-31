@@ -21,13 +21,15 @@ echo 'export PATH=$PATH:/usr/local/go/bin' >> /home/ec2-user/.bash_profile
 echo 'export GOPATH=/home/ec2-user/go' >> /home/ec2-user/.bash_profile
 echo 'export PATH=$PATH:$GOPATH/bin' >> /home/ec2-user/.bash_profile
 
+# Extract hostname from the endpoint
+db_host=$(echo "${db_endpoint}" | cut -d':' -f1)
 
 # Create .pgpass file with correct permissions
-sudo -u ec2-user bash -c "echo '${db_endpoint}:${db_port}:${db_name}:${db_username}:${db_password}' > /home/ec2-user/.pgpass"
+sudo -u ec2-user bash -c "echo '$db_host:${db_port}:${db_name}:${db_username}:${db_password}' > /home/ec2-user/.pgpass"
 sudo -u ec2-user chmod 600 /home/ec2-user/.pgpass
 
 # Create the videos table in the database
-sudo -u ec2-user psql -h ${db_endpoint} -U ${db_username} -d ${db_name} << EOF
+sudo -u ec2-user psql -h $db_host -p ${db_port} -U ${db_username} -d ${db_name} << EOF
 CREATE TABLE IF NOT EXISTS videos (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -51,7 +53,7 @@ Description=Golang Demo Application
 After=network.target
 
 [Service]
-Environment="DB_ENDPOINT=${db_endpoint}"
+Environment="DB_ENDPOINT=$db_host"
 Environment="DB_PORT=${db_port}"
 Environment="DB_USER=${db_username}"
 Environment="DB_PASS=${db_password}"
