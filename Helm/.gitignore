@@ -1,1 +1,2 @@
-values-*.yaml
+# Ignore k8s secrets
+values*.yaml
