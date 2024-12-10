@@ -1,0 +1,12 @@
+config:
+  environment: prod
+  database:
+    local:
+      enabled: false
+    external:
+      enabled: true
+      host: your-rds-endpoint.region.rds.amazonaws.com
+      credentials:
+        username: prod-username
+        password: prod-password
+        database: prod-database
