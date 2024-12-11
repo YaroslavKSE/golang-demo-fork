@@ -91,6 +91,17 @@ EOFF
 cd /home/ec2-user/helm-charts
 sudo -u ec2-user helm upgrade --install golang-demo . -f values-production.yaml
 
+# Install PostgresSQL client
+sudo dnf install postgresql16.x86_64 -y
+
+# Create the videos table in the database
+sudo -u ec2-user PGPASSWORD="${db_password}" psql -h ${db_host} -U ${db_username} -d ${db_name} << EOF
+CREATE TABLE IF NOT EXISTS videos (
+  id VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL
+);
+EOF
+
 # Install and configure Nginx
 sudo dnf install -y nginx
 
