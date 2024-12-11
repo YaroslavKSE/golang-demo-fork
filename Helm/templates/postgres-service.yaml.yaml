@@ -1,4 +1,3 @@
-# templates/postgres-service.yaml
 {{- if and (eq .Values.config.environment "local") (eq .Values.config.database.local.enabled true) }}
 apiVersion: v1
 kind: Service
