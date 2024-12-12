@@ -13,7 +13,8 @@ resource "aws_instance" "golang_app" {
     db_username = var.user_data_vars.db_username
     db_password = var.user_data_vars.db_password
     db_name     = var.user_data_vars.db_name
-    domain_name     = var.user_data_vars.domain_name
+    domain_name = var.user_data_vars.domain_name
+    db_host     = split(":", var.user_data_vars.db_endpoint)[0]
   })
 
   tags = {

@@ -37,7 +37,7 @@ module "ec2" {
     db_username = var.db_username
     db_password = var.db_password
     db_name     = var.db_name
-    domain_name     = var.domain_name
+    domain_name = var.domain_name
   }
 }
 

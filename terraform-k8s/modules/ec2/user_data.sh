@@ -54,9 +54,6 @@ sleep 30
 # Configure kubectl
 sudo -u ec2-user minikube update-context
 
-# Extract hostname from the endpoint
-db_host=$(echo "${db_endpoint}" | cut -d':' -f1)
-
 # Create values file for production deployment
 cat <<EOFF > /home/ec2-user/helm-charts/values-production.yaml
 image:
@@ -76,15 +73,12 @@ config:
       enabled: false
     external:
       enabled: true
-      host: "${db_host}"
+      host: ${db_host}
       port: ${db_port}
       credentials:
         username: "${db_username}"
         password: "${db_password}"
         database: "${db_name}"
-
-dbInit:
-  enabled: true
 EOFF
 
 # Deploy with Helm
@@ -115,7 +109,7 @@ server {
     listen 80;
     server_name ${domain_name};
     location / {
-        proxy_pass http://${MINIKUBE_IP}:${NODE_PORT};
+        proxy_pass http://$MINIKUBE_IP:$NODE_PORT;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
