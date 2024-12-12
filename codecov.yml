@@ -1,0 +1,15 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%    # the required coverage value
+        threshold: 1%  # allow coverage to drop by 1% while still posting success
+    patch:
+      default:
+        target: 80%    # the required coverage value for new code
+
+ignore:
+  - "vendor/**/*"     # ignore vendor directory
+  - "**/*_test.go"    # ignore test files
+  - "terraform/**/*"  # ignore terraform files
+  - "k8s/**/*"       # ignore kubernetes manifests
