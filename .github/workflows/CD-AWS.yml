@@ -62,13 +62,12 @@ jobs:
 
       - name: Update and Deploy with Helm
         run: |
-          REPO_NAME=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           aws ssm send-command \
             --instance-ids "${{ steps.get-instance.outputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[
               'cd /home/ec2-user/helm-charts && \
-              sed -i \"s|repository: .*|repository: ${REPO_LOWER}|\" values-production.yaml && \
+              sed -i \"s|repository: .*|repository: yaroslavkse/golang-demo-fork|\" values-production.yaml && \
               sed -i \"s|tag: .*|tag: ${{ steps.get-image.outputs.image_tag }}|\" values-production.yaml && \
               sudo -u ec2-user helm upgrade --install golang-demo . \
                 -f values-production.yaml \
@@ -76,7 +75,8 @@ jobs:
                 --create-namespace \
                 --atomic \
                 --timeout 5m'
-            ]"
+            ]" \
+            --output text
 
       - name: Verify Deployment
         run: |
@@ -84,5 +84,6 @@ jobs:
             --instance-ids "${{ steps.get-instance.outputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[
-              'sudo -u ec2-user kubectl rollout status deployment/golang-demo'
-            ]"
+              'sudo -u ec2-user helm history golang-demo'
+            ]" \
+            --output text
