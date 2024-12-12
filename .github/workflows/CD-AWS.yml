@@ -1,0 +1,88 @@
+name: Deploy to K8s with Helm
+on:
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: 'Docker image tag to deploy'
+        required: true
+      environment:
+        description: 'Environment to deploy to'
+        type: choice
+        options:
+          - production
+        required: true
+        default: 'production'
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+  packages: read
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to K8s
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Fetch Instance ID from S3
+        id: get-instance
+        run: |
+          aws s3 cp s3://golang-demo-terraform-state-production/terraform.tfstate .
+          INSTANCE_ID=$(jq -r '.outputs.golang_app_instance_id.value[0]' terraform.tfstate)
+          echo "instance_id=$INSTANCE_ID" >> $GITHUB_OUTPUT
+
+      - name: Get Image Tag
+        id: get-image
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "image_tag=${{ github.event.inputs.imageTag }}" >> $GITHUB_OUTPUT
+          else
+            # Get the SHA from the triggering workflow
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            # Use the short SHA as the tag
+            echo "image_tag=${SHA::7}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update and Deploy with Helm
+        run: |
+          REPO_LOWER="ghcr.io/${{ format('{0}', github.repository) }}".toLowerCase()
+          aws ssm send-command \
+            --instance-ids "${{ steps.get-instance.outputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[
+              'cd /home/ec2-user/helm-charts && \
+              sed -i \"s|repository: .*|repository: ${REPO_LOWER}|\" values-production.yaml && \
+              sed -i \"s|tag: .*|tag: ${{ steps.get-image.outputs.image_tag }}|\" values-production.yaml && \
+              sudo -u ec2-user helm upgrade --install golang-demo . \
+                -f values-production.yaml \
+                --namespace default \
+                --create-namespace \
+                --atomic \
+                --timeout 5m'
+            ]"
+
+      - name: Verify Deployment
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ steps.get-instance.outputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[
+              'sudo -u ec2-user kubectl rollout status deployment/golang-demo'
+            ]"
