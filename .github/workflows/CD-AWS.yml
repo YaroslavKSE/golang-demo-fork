@@ -62,7 +62,7 @@ jobs:
 
       - name: Update and Deploy with Helm
         run: |
-          REPO_LOWER="ghcr.io/${{ format('{0}', github.repository) }}".toLowerCase()
+          REPO_NAME=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           aws ssm send-command \
             --instance-ids "${{ steps.get-instance.outputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
