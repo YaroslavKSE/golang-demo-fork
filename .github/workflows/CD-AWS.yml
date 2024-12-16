@@ -67,7 +67,7 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[
               'cd /home/ec2-user/helm-charts && \
-              sed -i \"s|repository: .*|repository: yaroslavkse/golang-demo-fork|\" values-production.yaml && \
+              sed -i \"s|repository: .*|repository: ghcr.io/yaroslavkse/golang-demo-fork|\" values-production.yaml && \
               sed -i \"s|tag: .*|tag: ${{ steps.get-image.outputs.image_tag }}|\" values-production.yaml && \
               sudo -u ec2-user helm upgrade --install golang-demo . \
                 -f values-production.yaml \
