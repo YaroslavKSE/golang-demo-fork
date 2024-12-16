@@ -7,6 +7,15 @@ resource "aws_instance" "golang_app" {
   subnet_id              = var.public_subnet_ids[count.index % length(var.public_subnet_ids)]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
+  root_block_device {
+    volume_size = var.root_volume_size
+    volume_type = "gp3"
+    encrypted   = true
+    tags = {
+      Name = "golang-app-volume-${count.index + 1}"
+    }
+  }
+
   user_data = templatefile("${path.module}/user_data.sh", {
     db_endpoint = var.user_data_vars.db_endpoint
     db_port     = var.user_data_vars.db_port
