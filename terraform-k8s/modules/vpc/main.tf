@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name = "RocketDex-wpc"
+    Name = "Golang-app-wpc"
   }
 }
 
@@ -12,7 +12,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "RocketDex-igw"
+    Name = "Golang-app-igw"
   }
 }
 
@@ -25,7 +25,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "RocketDex-public-subnet-${count.index + 1}"
+    Name = "Golang-app-public-subnet-${count.index + 1}"
   }
 }
 
@@ -37,7 +37,7 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = {
-    Name = "RocketDex-private-subnet-${count.index + 1}"
+    Name = "Golang-app-private-subnet-${count.index + 1}"
   }
 }
 
@@ -45,7 +45,7 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 
   tags = {
-    Name = "RocketDex-nat-eip"
+    Name = "Golang-app-nat-eip"
   }
 }
 
@@ -54,7 +54,7 @@ resource "aws_nat_gateway" "main" {
   subnet_id     = aws_subnet.public[0].id
 
   tags = {
-    Name = "RocketDex-nat-gw"
+    Name = "Golang-app-nat-gw"
   }
 }
 
@@ -67,7 +67,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "RocketDex-public-rt"
+    Name = "Golang-app-public-rt"
   }
 }
 
@@ -80,7 +80,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "RocketDex-private-rt"
+    Name = "Golang-app-private-rt"
   }
 }
 

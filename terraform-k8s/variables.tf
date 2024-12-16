@@ -45,7 +45,7 @@ variable "key_name" {
 }
 
 variable "golang_app_instance_type" {
-  description = "RocketDexK8s EC2 instance type"
+  description = "Golang EC2 instance type"
   type        = string
   default     = "t3.medium"
 }
